@@ -25,20 +25,53 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
 @app.route('/members', methods=['GET'])
-def handle_hello():
-
-    # this is how you can use the Family datastructure by calling its methods
+def get_members():
     members = jackson_family.get_all_members()
-    response_body = {
-        "hello": "world",
-        "family": members
-    }
-
-
+    if members is None:
+        response_body = {
+            "msg": "No hay miembros",
+        }
+        return  jsonify(response_body), 404
+    else :
+        response_body = {
+            "family": members
+        }
     return jsonify(response_body), 200
+
+@app.route('/member/<int:member_id>', methods=['GET'])
+def get_member(member_id):
+    member = jackson_family.get_member(member_id)
+    if member is None:
+        response_body = {
+            "msg": "El miembro no exite ",
+        }
+        return  jsonify(response_body), 404
+    else :
+        response_body = {
+            "family": member
+        }
+    return jsonify(response_body), 200
+
+@app.route('/member/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+    jackson_family.delete_member(member_id)
+    response_body = {
+        "family": member
+    }
+    return jsonify(response_body), 200
+
+
+
+@app.route('/member', methods=['POST'])
+def add_member():
+    data = request.get_json()
+    new_member=jackson_family.add_member(data)
+    return jsonify({"msg":"El miembro se creo con exito"}),200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=True)
+1
